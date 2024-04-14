@@ -7,12 +7,13 @@
 #include "driver/gpio.h"
 
 extern "C" {
+    int something = 10;
     // Define the structure for shared variables
     uint8_t macAddress[6] = {0x3C, 0xE9, 0x0E, 0x87, 0x2F, 0xE0}; // receiver mac address
     struct variables {
         int data;
 
-    } variable;
+    }   variable;
 
     void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status);
 
