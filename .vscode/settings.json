@@ -1,0 +1,11 @@
+{
+    "files.associations": {
+        "string": "cpp",
+        "vector": "cpp",
+        "exception": "cpp",
+        "limits": "cpp",
+        "sstream": "cpp",
+        "functional": "cpp",
+        "algorithm": "cpp"
+    }
+}
