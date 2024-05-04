@@ -5,6 +5,7 @@
 #include <freertos/task.h>
 #include "esp_wifi.h"
 #include "driver/gpio.h"
+#include "nvs_flash.h"
 
 extern "C" {
     int something = 10;
@@ -18,11 +19,7 @@ extern "C" {
     void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status);
 
     void espnowSend(void *Parameter) {
-        wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
-        esp_wifi_init(&cfg);
-        esp_wifi_set_mode(WIFI_MODE_STA);
-        esp_wifi_set_channel(0, WIFI_SECOND_CHAN_NONE);
-        esp_wifi_start();
+        
 
         esp_now_peer_info_t peerinfo;
         variables *myvar = (variables*)Parameter;
@@ -100,6 +97,24 @@ extern "C" {
         // uint8_t num = 10;
         // uint8_t *data;
         // data = &num;
+
+        ESP_ERROR_CHECK_WITHOUT_ABORT(esp_netif_init());
+        ESP_ERROR_CHECK_WITHOUT_ABORT(esp_event_loop_create_default());
+        wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+        ESP_ERROR_CHECK_WITHOUT_ABORT(esp_wifi_init(&cfg));
+        ESP_ERROR_CHECK_WITHOUT_ABORT(esp_wifi_set_storage(WIFI_STORAGE_RAM));
+        ESP_ERROR_CHECK_WITHOUT_ABORT(esp_wifi_set_mode(WIFI_MODE_STA));
+        ESP_ERROR_CHECK_WITHOUT_ABORT(esp_wifi_start());
+
+        esp_err_t ret = nvs_flash_init();
+        if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND)
+        {
+            ESP_ERROR_CHECK_WITHOUT_ABORT(nvs_flash_erase());
+            ret = nvs_flash_init();
+        }
+        ESP_ERROR_CHECK_WITHOUT_ABORT(ret);
+
+
         xTaskCreatePinnedToCore(&espnowSend, "EspNowTask", 10000, (void*)&variable, 1, NULL, 0);
         xTaskCreatePinnedToCore(&NullTask, "NullTask", 2048, (void*)&variable, 1, NULL, 1);
     }
